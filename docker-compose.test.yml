@@ -1,0 +1,101 @@
+networks:
+  traefik-public:
+    external: false
+services:
+  backend:
+    build:
+      args:
+        INSTALL_DEV: "true"
+      context: D:\Projects\AppFollow\backend
+      dockerfile: backend.dockerfile
+    depends_on:
+    - db
+    deploy:
+      labels:
+      - traefik.enable=true
+      - traefik.constraint-label-stack=example.com
+      - traefik.http.routers.example-com-backend-http.rule=PathPrefix(`/api`) || PathPrefix(`/docs`)
+        || PathPrefix(`/redoc`)
+      - traefik.http.services.example-com-backend.loadbalancer.server.port=80
+    environment:
+      BACKEND_CORS_ORIGINS: '["http://localhost", "http://localhost:4200", "http://localhost:3000",
+        "http://localhost:8080", "https://localhost", "https://localhost:4200", "https://localhost:3000",
+        "https://localhost:8080", "http://dev.example.com", "https://stag.example.com",
+        "https://example.com"]'
+      DOMAIN: localhost
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_SERVER: db
+      POSTGRES_USER: postgres
+      PROJECT_NAME: appfollow
+      SERVER_HOST: https://backend
+      SERVER_NAME: backend
+      STACK_NAME: example-com
+      TRAEFIK_PUBLIC_NETWORK: traefik-public
+      TRAEFIK_PUBLIC_TAG: traefik-public
+      TRAEFIK_TAG: example.com
+    image: my-appfollow/backend:latest
+  db:
+    deploy:
+      placement:
+        constraints:
+        - node.labels.example-com.app-db-data == true
+    environment:
+      BACKEND_CORS_ORIGINS: '["http://localhost", "http://localhost:4200", "http://localhost:3000",
+        "http://localhost:8080", "https://localhost", "https://localhost:4200", "https://localhost:3000",
+        "https://localhost:8080", "http://dev.example.com", "https://stag.example.com",
+        "https://example.com"]'
+      DOMAIN: localhost
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_SERVER: db
+      POSTGRES_USER: postgres
+      PROJECT_NAME: appfollow
+      STACK_NAME: example-com
+      TRAEFIK_PUBLIC_NETWORK: traefik-public
+      TRAEFIK_PUBLIC_TAG: traefik-public
+      TRAEFIK_TAG: example.com
+    image: postgres:12
+    volumes:
+    - app-db-data:/var/lib/postgresql/data/pgdata:rw
+  proxy:
+    command:
+    - --providers.docker
+    - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `example.com`)
+    - --providers.docker.exposedbydefault=false
+    - --providers.docker.swarmmode
+    - --accesslog
+    - --log
+    - --api
+    deploy:
+      labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.middlewares.example-com-https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.example-com-https-redirect.redirectscheme.permanent=true
+      - traefik.http.routers.example-com-proxy-http.rule=Host(`backend`) || Host(`www.backend`)
+      - traefik.http.routers.example-com-proxy-http.entrypoints=http
+      - traefik.http.routers.example-com-proxy-https.rule=Host(`backend`) || Host(`www.backend`)
+      - traefik.http.routers.example-com-proxy-https.entrypoints=https
+      - traefik.http.routers.example-com-proxy-https.tls=true
+      - traefik.http.routers.example-com-proxy-https.tls.certresolver=le
+      - traefik.http.services.example-com-proxy.loadbalancer.server.port=80
+      - traefik.http.middlewares.example-com-www-redirect.redirectregex.regex=^https?://(www.)?(backend)/(.*)
+      - traefik.http.middlewares.example-com-www-redirect.redirectregex.replacement=https://backend/$${3}
+      - traefik.http.routers.example-com-proxy-https.middlewares=example-com-www-redirect
+      - traefik.http.routers.example-com-proxy-http.middlewares=example-com-www-redirect,example-com-https-redirect
+      placement:
+        constraints:
+        - node.role == manager
+    image: traefik:v2.2
+    networks:
+      default: null
+      traefik-public: null
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:rw
+version: '3.3'
+volumes:
+  app-db-data: {}
+
