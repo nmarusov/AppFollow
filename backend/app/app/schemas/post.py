@@ -45,3 +45,7 @@ class PostInDB(PostInDBBase):
 
 
 PostColumns = Enum("PostColumns", {field: field for field in Post.__fields__.keys()})
+
+class SortDirection(str, Enum):
+    ascending = "asc"
+    descending = "desc"

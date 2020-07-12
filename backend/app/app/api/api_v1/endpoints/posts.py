@@ -1,5 +1,4 @@
 from typing import Any, List
-from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -8,11 +7,6 @@ from app import crud, models, schemas
 from app.api import deps
 
 router = APIRouter()
-
-
-class SortDirection(str, Enum):
-    ascending = "asc"
-    descending = "desc"
 
 
 @router.get("/", response_model=List[schemas.Post])
@@ -24,8 +18,8 @@ def read_posts(
         schemas.PostColumns.id,
         description="Specifies the column by which records being sorted",
     ),
-    direction: SortDirection = Query(
-        SortDirection.ascending, description="Sorting direction"
+    direction: schemas.SortDirection = Query(
+        schemas.SortDirection.ascending, description="Sorting direction"
     ),
 ) -> Any:
     """
