@@ -1,6 +1,6 @@
+from datetime import datetime
 from enum import Enum
 from typing import Optional
-from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -45,6 +45,7 @@ class PostInDB(PostInDBBase):
 
 
 PostColumns = Enum("PostColumns", {field: field for field in Post.__fields__.keys()})
+
 
 class SortDirection(str, Enum):
     ascending = "asc"

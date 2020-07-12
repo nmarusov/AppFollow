@@ -1,14 +1,10 @@
 import re
-from datetime import datetime
 
 import requests
-from sqlalchemy.exc import InvalidRequestError
 
-from app.core.celery_app import celery_app
 from app import crud
+from app.core.celery_app import celery_app
 from app.db.session import SessionLocal
-from app.models.post import Post
-
 
 URL = "https://news.ycombinator.com/news"
 PATTERN = re.compile(
@@ -24,7 +20,6 @@ def parse_page(url: str) -> str:
     items = [match.groupdict() for match in matches][:MAX_POSTS]
     session = SessionLocal()
     count = 0
-    msg = ""
 
     for item in items:
         try:

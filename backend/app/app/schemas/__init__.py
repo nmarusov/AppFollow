@@ -1,9 +1,1 @@
-from .post import (
-    Post,
-    PostCreate,
-    PostInDB,
-    PostUpdate,
-    PostColumns,
-    SortDirection,
-    PostColumns,
-)
+from .post import Post, PostColumns, PostCreate, PostInDB, PostUpdate, SortDirection

@@ -1,6 +1,3 @@
-from typing import Optional
-from random import randint
-
 from sqlalchemy.orm import Session
 
 from app import crud, models

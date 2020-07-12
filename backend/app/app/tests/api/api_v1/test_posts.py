@@ -1,15 +1,14 @@
 from datetime import datetime
 from operator import attrgetter
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-from app.db.session import SessionLocal
-from sqlalchemy import create_engine
-
-from app.core.config import settings
-from app.tests.utils.post import create_random_post
-from app.models import Post
 
 import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.db.session import SessionLocal
+from app.models import Post
+from app.tests.utils.post import create_random_post
 
 
 def setup_function(function):
@@ -66,7 +65,8 @@ def test_get_posts(client: TestClient, db: Session, order, direction) -> None:
 def test_get_posts_limit(client: TestClient, db: Session, limit) -> None:
     NUM_POSTS = 10
 
-    posts = [create_random_post(db) for _ in range(NUM_POSTS)]
+    for _ in range(NUM_POSTS):
+        create_random_post(db)
 
     params = {"limit": limit}
     response = client.get(f"{settings.API_V1_STR}/posts", params=params)
@@ -96,7 +96,8 @@ def test_get_posts_limit_default(client: TestClient, db: Session) -> None:
     DEFAULT_LIMIT = 5
     NUM_POSTS = 10
 
-    posts = [create_random_post(db) for _ in range(NUM_POSTS)]
+    for _ in range(NUM_POSTS):
+        create_random_post(db)
 
     response = client.get(f"{settings.API_V1_STR}/posts")
 
@@ -112,7 +113,8 @@ def test_get_posts_limit_default(client: TestClient, db: Session) -> None:
 def test_get_posts_offset(client: TestClient, db: Session, offset) -> None:
     NUM_POSTS = 10
 
-    posts = [create_random_post(db) for _ in range(NUM_POSTS)]
+    for _ in range(NUM_POSTS):
+        create_random_post(db)
 
     params = {"offset": offset, "limit": 20}
     response = client.get(f"{settings.API_V1_STR}/posts", params=params)

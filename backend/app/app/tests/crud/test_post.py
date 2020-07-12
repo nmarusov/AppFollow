@@ -1,9 +1,8 @@
 from sqlalchemy.orm import Session
 
 from app import crud
-from app.schemas.post import PostCreate, PostUpdate
+from app.schemas.post import PostCreate
 from app.tests.utils.utils import random_lower_string
-
 
 # def test_create_post(db: Session) -> None:
 #     title = random_lower_string()
