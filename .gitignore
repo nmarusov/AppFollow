@@ -1,3 +1,5 @@
 .vscode
 .mypy_cache
 docker-stack.yml
+backend/app/poetry.lock
+backend/app/celerybeat-schedule
