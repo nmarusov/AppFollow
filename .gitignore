@@ -1,4 +1,5 @@
 .vscode
+.venv
 .mypy_cache
 docker-stack.yml
 backend/app/poetry.lock
